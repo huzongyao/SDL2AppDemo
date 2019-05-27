@@ -1,0 +1,57 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 28
+
+    signingConfigs {
+        demokey {
+            storeFile file('demokey.jks')
+            storePassword "demokey"
+            keyAlias 'demokey'
+            keyPassword 'demokey'
+        }
+    }
+    defaultConfig {
+        applicationId "org.libsdl.app"
+        minSdkVersion 15
+        targetSdkVersion 28
+        versionCode 3
+        versionName "2.0.9"
+        externalNativeBuild {
+            ndkBuild {
+                abiFilters "armeabi-v7a"
+            }
+        }
+    }
+    buildTypes {
+        debug {
+            minifyEnabled false
+            signingConfig signingConfigs.demokey
+        }
+        release {
+            minifyEnabled true
+            signingConfig signingConfigs.demokey
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+    applicationVariants.all { variant ->
+        variant.outputs.all {
+            def fileName = project.name + '-' + variant.name + '-V' +
+                    defaultConfig.versionCode + "-" + buildTime() + ".apk"
+            outputFileName = fileName
+        }
+    }
+    externalNativeBuild {
+        ndkBuild {
+            path 'src/main/cpp/Android.mk'
+        }
+    }
+}
+
+static def buildTime() {
+    return new Date().format("yyyyMMdd", TimeZone.getDefault())
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+}
